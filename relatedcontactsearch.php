@@ -123,30 +123,18 @@ function relatedcontactsearch_civicrm_alterSettingsFolders(&$metaDataFolders = N
   _relatedcontactsearch_civix_civicrm_alterSettingsFolders($metaDataFolders);
 }
 
-// --- Functions below this ship commented out. Uncomment as required. ---
-
 /**
- * Implements hook_civicrm_preProcess().
+ * Implements hook_civicrm_searchTasks().
  *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_preProcess
- *
-function relatedcontactsearch_civicrm_preProcess($formName, &$form) {
+ * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_searchTasks
+ */
+function relatedcontactsearch_civicrm_searchTasks( $objectType, &$tasks ) {
+  // could be nice to have a shortcut to get all related contact from a search results
+  // but maybe better to have a powerful custom search first
+  /*$tasks[] = array(
+    'title' => E::ts('Find Related Contacts'),
+    'CRM_Relatedcontactsearch_Form_Task_FindRelated',
+  );*/ 
 
-} // */
+}
 
-/**
- * Implements hook_civicrm_navigationMenu().
- *
- * @link http://wiki.civicrm.org/confluence/display/CRMDOC/hook_civicrm_navigationMenu
- *
-function relatedcontactsearch_civicrm_navigationMenu(&$menu) {
-  _relatedcontactsearch_civix_insert_navigation_menu($menu, NULL, array(
-    'label' => E::ts('The Page'),
-    'name' => 'the_page',
-    'url' => 'civicrm/the-page',
-    'permission' => 'access CiviReport,access CiviContribute',
-    'operator' => 'OR',
-    'separator' => 0,
-  ));
-  _relatedcontactsearch_civix_navigationMenu($menu);
-} // */
