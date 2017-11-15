@@ -22,6 +22,5 @@ With this extension :
 
 ## Known limits
 
-* include / exclude doesn't work with parent group -- see also https://issues.civicrm.org/jira/browse/CRM-15049 as we use a similar code as Include / Exclude search
 * no way to prioritize one role over another (take role #1 if exist otherwise role #2)
 

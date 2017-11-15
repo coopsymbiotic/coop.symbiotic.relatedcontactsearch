@@ -252,6 +252,12 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
       }
       $includedGroups = implode(',', $allGroups);
 
+      //CRM-15049 - Include child group ids.
+      $childGroupIds = CRM_Contact_BAO_Group::getChildGroupIds($this->_includeGroups);
+      if (count($childGroupIds) > 0) {
+        $this->_includeGroups = array_merge($this->_includeGroups, $childGroupIds);
+      }
+
       if (!empty($this->_includeGroups)) {
         $iGroups = implode(',', $this->_includeGroups);
       }
@@ -259,6 +265,13 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
         //if no group selected search for all groups
         $iGroups = $includedGroups;
       }
+
+      //CRM-15049 - Exclude child group ids.
+      $childGroupIds = CRM_Contact_BAO_Group::getChildGroupIds($this->_excludeGroups);
+      if (count($childGroupIds) > 0) {
+        $this->_excludeGroups = array_merge($this->_excludeGroups, $childGroupIds);
+      }
+
       if (is_array($this->_excludeGroups)) {
         $xGroups = implode(',', $this->_excludeGroups);
       }
