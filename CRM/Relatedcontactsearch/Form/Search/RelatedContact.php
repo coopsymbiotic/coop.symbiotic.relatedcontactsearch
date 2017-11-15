@@ -86,14 +86,14 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
 
     $form->addElement('select',
       'relationship_type',
-      ts('Relationship #1'),
+      E::ts('Relationship %1', array(1 => '#1')),
       $rSelect,
       array('class' => 'crm-select2')
     );
 
     $form->addElement('select',
       'relationship_type_2',
-      ts('Relationship #2'),
+      E::ts('Relationship %1', array(1 => '#2')),
       $rSelect,
       array('class' => 'crm-select2')
     );
