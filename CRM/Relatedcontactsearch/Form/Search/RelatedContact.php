@@ -58,14 +58,14 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
     );
 
     $form->add('select', 'includeGroups',
-      ts('Include Group(s)'),
+      'Limiter aux contacts des groupes',  //'ts('Include Group(s)'),
       $groups,
       FALSE,
       $select2style
     );
 
     $form->add('select', 'excludeGroups',
-      ts('Exclude Group(s)'),
+      'Exclure les contacts des groupes',  // ts('Exclude Group(s)'),
       $groups,
       FALSE,
       $select2style
@@ -99,7 +99,7 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
       array('class' => 'crm-select2')
     );
 
-    $form->assign('elements', array('includeGroups', 'excludeGroups', 'relationship_type', 'relationship_type_2'));
+    $form->assign('elements', array('relationship_type', 'relationship_type_2', 'includeGroups', 'excludeGroups'));
 
   }
 
@@ -131,6 +131,8 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
       E::ts('Contact Name') => 'sort_name',
       E::ts('Relationship Type') => 'relationship_type',
       E::ts('Contact Related To') => 'origin_contact',
+      E::ts('Email') => 'email',
+      E::ts('Source') => 'source',
     );
     return $columns;
   }
@@ -187,7 +189,7 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
       print "</pre>";
       die();
     }
-
+watchdog('debug', 'search all -- ' . $sql);
     return $sql;
   }
 
@@ -203,7 +205,9 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
       contact_a.contact_type as contact_type,
       contact_a.sort_name    as sort_name,
       contact_origin.display_name as origin_contact,
-      IF(r.contact_id_a = contact_a.id, rt.label_a_b, rt.label_b_a) as relationship_type";
+      IF(r.contact_id_a = contact_a.id, rt.label_a_b, rt.label_b_a) as relationship_type
+      ,contact_a.source as source,email.email as email
+      ";
       //CONCAT(rt.label_a_b, ' / ', rt.label_b_a) as relationship_type
   }
 
@@ -426,6 +430,7 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
     $sql = "civicrm_contact contact_a ";
     $sql .= "  INNER JOIN civicrm_relationship r ON (r.contact_id_a = contact_a.id OR r.contact_id_b = contact_a.id) ";
     $sql .= "  INNER JOIN civicrm_contact contact_origin ON (r.contact_id_a = contact_origin.id OR r.contact_id_b = contact_origin.id) ";
+    $sql .= "  LEFT JOIN civicrm_email email ON (email.contact_id = contact_a.id AND email.is_primary = 1) ";
 //    $sql .= "  INNER JOIN civicrm_group_contact group_contact ON group_contact.contact_id = contact_origin.id ";
     return $sql;
   }
