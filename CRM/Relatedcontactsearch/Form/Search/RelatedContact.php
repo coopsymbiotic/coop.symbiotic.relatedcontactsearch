@@ -1,6 +1,8 @@
 <?php
 use CRM_Relatedcontactsearch_ExtensionUtil as E;
 
+DEFINE("RELATEDCONTACTSEARCH_MAX_RELATIONSHIP", 2);
+
 /**
  * A custom contact search
  */
@@ -84,22 +86,21 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
       }
     }
 
-    $form->add('select',
-      'relationship_type',
-      E::ts('Relationship %1', array(1 => '#1')),
-      $rSelect,
-      TRUE,
-      array('class' => 'crm-select2')
-    );
+    $elements = array();
+    for ($idx = 1; $idx <= RELATEDCONTACTSEARCH_MAX_RELATIONSHIP; $idx++) {
+      $form->add('select',
+        'relationship_type_' . $idx,
+        E::ts('Relationship %1', array(1 => '#' . $idx)),
+        $rSelect,
+        ($idx == 1) ? TRUE : FALSE,
+        array('class' => 'crm-select2')
+      );
+      $elements[] = 'relationship_type_' . $idx;
+    }
+    $elements[] = 'includeGroups';
+    $elements[] = 'excludeGroups';
 
-    $form->addElement('select',
-      'relationship_type_2',
-      E::ts('Relationship %1', array(1 => '#2')),
-      $rSelect,
-      array('class' => 'crm-select2')
-    );
-
-    $form->assign('elements', array('relationship_type', 'relationship_type_2', 'includeGroups', 'excludeGroups'));
+    $form->assign('elements', $elements);
 
   }
 
@@ -448,13 +449,13 @@ watchdog('debug', 'search all -- ' . $sql);
 
     $clause = array();
     $clauserel = array();
-
-    $relationship_type_1 = CRM_Utils_Array::value('relationship_type', $this->_formValues);
-    $relationship_type_2 = CRM_Utils_Array::value('relationship_type_2', $this->_formValues);
-
-    // relationship fast filter
     $rtids = array();
-    foreach (array($relationship_type_1, $relationship_type_2) as $rtype) { 
+
+    // loop on any relationship criteria
+    for ($idx = 1; $idx <= RELATEDCONTACTSEARCH_MAX_RELATIONSHIP; $idx++) {
+      $rtype = CRM_Utils_Array::value('relationship_type_' . $idx, $this->_formValues);
+ 
+      // relationship fast filter
       $l = explode('_', $rtype);
       if (!empty($l[0])) {
         $rtids[] = $l[0];
