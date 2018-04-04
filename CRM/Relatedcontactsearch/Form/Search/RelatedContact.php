@@ -447,6 +447,7 @@ watchdog('debug', 'search all -- ' . $sql);
     $count = 1;
 
     $clause = array();
+    $clauserel = array();
 
     $relationship_type_1 = CRM_Utils_Array::value('relationship_type', $this->_formValues);
     $relationship_type_2 = CRM_Utils_Array::value('relationship_type_2', $this->_formValues);
@@ -458,28 +459,18 @@ watchdog('debug', 'search all -- ' . $sql);
       if (!empty($l[0])) {
         $rtids[] = $l[0];
       }
-    }
-    $clause[] = "r.relationship_type_id IN (" . implode(',', $rtids) . ')';
 
-    // relationship joins
-    $clauserel = array();
-
-    $relationship_type = $relationship_type_1;
-    $clauserel[] = "
-         (r.contact_id_a = contact_a.id AND r.contact_id_b = contact_origin.id AND CONCAT(r.relationship_type_id, '_ab') = %{$count})
-      OR (r.contact_id_b = contact_a.id AND r.contact_id_a = contact_origin.id AND CONCAT(r.relationship_type_id, '_ba') = %{$count})";
-    $params[$count] = array($relationship_type, 'String');
-    $count += 1;
-
-    $relationship_type = $relationship_type_2;
-    if (!empty($relationship_type)) {
-      $clauserel[] = "
-           (r.contact_id_a = contact_a.id AND r.contact_id_b = contact_origin.id AND CONCAT(r.relationship_type_id, '_ab') = %{$count})
-        OR (r.contact_id_b = contact_a.id AND r.contact_id_a = contact_origin.id AND CONCAT(r.relationship_type_id, '_ba') = %{$count})";
-      $params[$count] = array($relationship_type, 'String');
+      // relationship joins
+      if ($l[1] == 'ab') {
+        $clauserel[] = "(r.contact_id_a = contact_a.id AND r.contact_id_b = contact_origin.id AND r.relationship_type_id = %{$count})";
+      }
+      else {
+        $clauserel[] = "(r.contact_id_a = contact_a.id AND r.contact_id_b = contact_origin.id AND r.relationship_type_id = %{$count})";
+      }
+      $params[$count] = array($l[0], 'String');
       $count += 1;
     }
-    
+    $clause[] = "r.relationship_type_id IN (" . implode(',', $rtids) . ')';
     $clause[] = '(' . implode(' OR ', $clauserel) . ')';
 
 
