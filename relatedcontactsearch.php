@@ -138,3 +138,88 @@ function relatedcontactsearch_civicrm_searchTasks( $objectType, &$tasks ) {
 
 }
 
+/**
+ * Implements hook_civicrm_searchColumns().
+ *
+ * @link https://docs.civicrm.org/dev/en/latest/hooks/hook_civicrm_searchColumns/
+ */
+function relatedcontactsearch_civicrm_searchColumns( $objectName, &$headers, &$rows, &$selector ) {
+  if (empty($rows)) {
+    return;
+  }
+
+global $user;
+if ($user->uid != 1) return;
+
+return;
+//print_r($headers); die();
+
+  // add one column that allows to sort by organization
+  // it helps grouping all related contacts
+  if ( $objectName == 'contact' ) {
+    $new_headers = array(
+      'org_with_relations' => array('name' => 'Relation (tri)'),
+    );
+
+    // remove the column if it's already there
+    foreach ($headers as $header) {
+      if (isset($header['sort'])) {
+        $key = $header['sort'];
+        if (array_key_exists($key, $new_headers)) {
+          unset($new_headers[$key]);
+        }
+      }
+    }
+
+    // only if the is something to add
+    if (count($new_headers) > 0) {
+      // insert new headers before organization
+      array_splice($headers, 2, 0, $new_headers);
+
+      $ids = array();
+      foreach ( $rows as $id => $row ) {
+        $ids[] = $row['contact_id'];
+      }
+      $ids = implode(',', $ids);
+
+      $sql = "
+SELECT c.id as contact_id, CONCAT(
+  c.organization_name, ' (', IF(c.contact_type = 'Individual', c.employer_id, c.id), ') - ', 
+  GROUP_CONCAT(REPLACE(rt.label_a_b, ' de', '') ORDER BY rt.id)) AS org_with_relations
+FROM civicrm_contact c 
+  LEFT JOIN civicrm_relationship r ON r.contact_id_a = c.id AND contact_id_b = c.employer_id 
+  LEFT JOIN civicrm_relationship_type rt ON rt.id = r.relationship_type_id 
+WHERE c.id IN (" . $ids . ") AND rt.is_active = 1 
+GROUP BY c.id";
+      $dao = CRM_Core_DAO::executeQuery($sql);
+
+      // sometimes ids are not contact_id (custom searches) so we need to have an equivalence
+      $contactRow = array();
+      foreach ($rows as $id => $row) {
+        $contactRow[$row['contact_id']] = $id;
+      }
+
+      // add results to rows
+      while ($dao->fetch()) {
+        foreach ($new_headers as $key => $header) {
+          $id = $contactRow[$dao->contact_id];
+          $name = $header['name'];
+
+          if ($rows[$id]['contact_id'] == $dao->contact_id) {
+
+            $rows[$id][$name] = '';
+
+            if (isset($dao->$key)) {
+              $rows[$id][$name] = $dao->$key;
+            }
+          }
+        }
+      }
+
+
+    }
+
+  }
+
+}
+

@@ -1,7 +1,7 @@
 <?php
 use CRM_Relatedcontactsearch_ExtensionUtil as E;
 
-DEFINE("RELATEDCONTACTSEARCH_MAX_RELATIONSHIP", 2);
+DEFINE("RELATEDCONTACTSEARCH_MAX_RELATIONSHIP", 3);
 
 /**
  * A custom contact search
@@ -10,6 +10,11 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
   function __construct(&$formValues) {
 
     $this->_formValues = $formValues;
+
+    // backward compatibility
+    if (isset($formValues['relationship_type'])) {
+      $formValues['relationship_type_1'] = $formValues['relationship_type'];
+    }
 
     $this->_includeGroups = CRM_Utils_Array::value('includeGroups', $this->_formValues, array());
     $this->_excludeGroups = CRM_Utils_Array::value('excludeGroups', $this->_formValues, array());
