@@ -54,6 +54,11 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
   function buildForm(&$form) {
     CRM_Utils_System::setTitle(E::ts('Search Related Contacts'));
 
+    // origin contact name
+    $form->add('text', 'contactname',
+      "Nom du contact d'origine"//E::ts('Origin Contact Name')
+    );
+
     // include / exclude groups
     $groups = CRM_Core_PseudoConstant::nestedGroup();
 
@@ -91,7 +96,7 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
       }
     }
 
-    $elements = array();
+    $elements = [];
     for ($idx = 1; $idx <= RELATEDCONTACTSEARCH_MAX_RELATIONSHIP; $idx++) {
       $form->add('select',
         'relationship_type_' . $idx,
@@ -102,6 +107,7 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
       );
       $elements[] = 'relationship_type_' . $idx;
     }
+    $elements[] = 'contactname';
     $elements[] = 'includeGroups';
     $elements[] = 'excludeGroups';
 
@@ -195,7 +201,6 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
       print "</pre>";
       die();
     }
-watchdog('debug', 'search all -- ' . $sql);
     return $sql;
   }
 
@@ -455,6 +460,14 @@ watchdog('debug', 'search all -- ' . $sql);
     $clause = array();
     $clauserel = array();
     $rtids = array();
+
+    // contact name
+    $contactname = CRM_Utils_Array::value('contactname', $this->_formValues);
+    if (!empty($contactname)) {
+      $params[$count] = ["%".$contactname."%", 'String'];
+      $clause[] = "contact_origin.sort_name LIKE %{$count}";
+      $count +=1;
+    }
 
     // loop on any relationship criteria
     for ($idx = 1; $idx <= RELATEDCONTACTSEARCH_MAX_RELATIONSHIP; $idx++) {
