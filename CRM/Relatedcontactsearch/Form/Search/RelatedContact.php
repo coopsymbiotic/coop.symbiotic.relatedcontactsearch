@@ -352,7 +352,8 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
 
           $ssId = CRM_Utils_Array::key($values, $smartGroup);
 
-          $smartSql = CRM_Contact_BAO_SavedSearch::contactIDsSQL($ssId);
+          //$smartSql = CRM_Contact_BAO_SearchCustom::contactIDSQL(NULL, $ssId);
+          $smartSql = self::contactIDsSQL($ssId);
 
           $smartSql .= " AND contact_a.id IN (
                                    SELECT contact_id AS contact_id
@@ -503,4 +504,47 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
   function alterRow(&$row) {
     //$row['origin_contact'] .= ' (' . $row['rt_a_b'] . ')';
   }
+
+  public static function contactIDsSQL($id) {
+
+    $params = self::getSearchParams($id);
+    if ($params && !empty($params['customSearchID'])) {
+      return CRM_Contact_BAO_SearchCustom::contactIDSQL(NULL, $id);
+    }
+    else {
+      $tables = $whereTables = ['civicrm_contact' => 1];
+      $where = CRM_Contact_BAO_SavedSearch::whereClause($id, $tables, $whereTables);
+      if (!$where) {
+        $where = '( 1 )';
+      }
+      $from = CRM_Contact_BAO_Query::fromClause($whereTables);
+      return "
+SELECT contact_a.id
+$from
+WHERE  $where";
+    }
+
+  }
+
+  public static function getSearchParams($id) {
+    $savedSearch = \Civi\Api4\SavedSearch::get(FALSE)
+      ->addWhere('id', '=', $id)
+      ->execute()
+      ->first();
+    if ($savedSearch['api_entity']) {
+      return $savedSearch;
+    }
+    $fv = CRM_Contact_BAO_SavedSearch::getFormValues($id);
+    //check if the saved search has mapping id
+    if ($savedSearch['mapping_id']) {
+      return CRM_Core_BAO_Mapping::formattedFields($fv);
+    }
+    elseif (!empty($fv['customSearchID'])) {
+      return $fv;
+    }
+    else {
+      return CRM_Contact_BAO_Query::convertFormValues($fv);
+    }
+  }
+
 }
