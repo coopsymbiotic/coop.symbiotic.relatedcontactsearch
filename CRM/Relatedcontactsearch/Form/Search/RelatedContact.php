@@ -263,7 +263,7 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
         //if no group selected search for all groups
         $iGroups = $includedGroups;
       }
-      if (is_array($this->_excludeGroups)) {
+      if (!empty($this->_excludeGroups) && is_array($this->_excludeGroups)) {
         $xGroups = implode(',', $this->_excludeGroups);
       }
       else {
