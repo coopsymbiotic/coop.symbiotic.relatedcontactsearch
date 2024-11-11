@@ -16,12 +16,20 @@
   </urls>
   <releaseDate>2017-11-13</releaseDate>
   <version>1.0</version>
-  <develStage></develStage>
+  <develStage/>
   <compatibility>
     <ver>5.65</ver>
   </compatibility>
-  <comments></comments>
+  <comments/>
   <civix>
     <namespace>CRM/Relatedcontactsearch</namespace>
+    <format>23.02.1</format>
   </civix>
+  <mixins>
+    <mixin>mgd-php@1.0.0</mixin>
+  </mixins>
+  <classloader>
+    <psr0 prefix="CRM_" path="."/>
+    <psr4 prefix="Civi\" path="Civi"/>
+  </classloader>
 </extension>

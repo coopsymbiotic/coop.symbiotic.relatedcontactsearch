@@ -5,6 +5,10 @@ use CRM_Relatedcontactsearch_ExtensionUtil as E;
  * A custom contact search
  */
 class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Form_Search_Custom_Base implements CRM_Contact_Form_Search_Interface {
+
+  protected $_includeGroups;
+  protected $_excludeGroups;
+
   function __construct(&$formValues) {
 
     $this->_formValues = $formValues;
