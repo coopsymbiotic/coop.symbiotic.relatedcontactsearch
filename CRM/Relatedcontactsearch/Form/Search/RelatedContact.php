@@ -8,6 +8,7 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
 
   protected $_includeGroups;
   protected $_excludeGroups;
+  public $_debug;
 
   function __construct(&$formValues) {
 
@@ -292,7 +293,7 @@ class CRM_Relatedcontactsearch_Form_Search_RelatedContact extends CRM_Contact_Fo
           if (in_array($values, $smartGroup)) {
             $ssId = CRM_Utils_Array::key($values, $smartGroup);
 
-            $smartSql = CRM_Contact_BAO_SavedSearch::contactIDsSQL($ssId);
+            $smartSql = self::contactIDsSQL($ssId);
 
             $smartSql = $smartSql . " AND contact_a.id NOT IN (
                               SELECT contact_id FROM civicrm_group_contact
